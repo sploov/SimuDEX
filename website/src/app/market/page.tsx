@@ -75,8 +75,14 @@ export default function MarketPage() {
                                 <Badge variant="secondary">Verified</Badge>
                             )}
                         </TableCell>
+import Link from "next/link";
+// ... (imports)
+
+// ... inside map loop
                         <TableCell className="text-right">
-                            <Button size="sm" variant="outline">Trade</Button>
+                            <Button size="sm" variant="outline" asChild>
+                                <Link href={`/trade/${token.id}`}>Trade</Link>
+                            </Button>
                         </TableCell>
                         </TableRow>
                     ))
