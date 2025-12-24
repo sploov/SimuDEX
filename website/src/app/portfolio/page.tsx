@@ -80,7 +80,7 @@ export default function PortfolioPage() {
                                 ))}
                             </Pie>
                             <Tooltip 
-                                formatter={(value: number) => `$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                                formatter={(value: any) => `$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
                                 contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }}
                             />
                         </PieChart>
