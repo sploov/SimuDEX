@@ -274,6 +274,26 @@ export async function playRugplay(betAmount: number, multiplier: number, won: bo
     }
 }
 
+export async function getLeaderboard() {
+    try {
+        // Fetch top 50 users by USDT balance
+        const users = await prisma.user.findMany({
+            take: 50,
+            orderBy: { balanceUSDT: 'desc' },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                balanceUSDT: true,
+                createdAt: true
+            }
+        });
+        return users;
+    } catch (e) {
+        return [];
+    }
+}
+
 export async function getRecentTrades() {
     try {
         return await prisma.trade.findMany({
@@ -291,6 +311,18 @@ export async function getNews() {
         return await prisma.news.findMany({
             take: 10,
             orderBy: { createdAt: "desc" }
+        });
+    } catch (e) {
+        return [];
+    }
+}
+
+export async function getTokenTrades(tokenId: string) {
+    try {
+        return await prisma.trade.findMany({
+            where: { tokenId },
+            orderBy: { timestamp: "asc" },
+            take: 100
         });
     } catch (e) {
         return [];
