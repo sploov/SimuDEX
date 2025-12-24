@@ -43,16 +43,22 @@ const footerItems = [
   { name: "Privacy", href: "/privacy", icon: Shield },
 ];
 
+import Image from "next/image";
+
+// ... (existing imports)
+
 export function AppSidebar() {
   const pathname = usePathname();
 
   return (
     <div className="hidden border-r bg-card/50 md:block md:w-64 lg:w-72 h-screen sticky top-0 backdrop-blur-xl">
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-6 lg:h-[60px]">
+        <div className="flex h-16 items-center border-b px-6 lg:h-[70px]">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            <span className="text-primary text-2xl">⚡</span>
-            <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+            <div className="relative w-8 h-8 mr-2">
+                <Image src="/logo.png" alt="SimuDEX Logo" fill className="object-contain" />
+            </div>
+            <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent text-2xl">
               SimuDEX
             </span>
           </Link>

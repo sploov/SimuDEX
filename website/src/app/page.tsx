@@ -6,14 +6,28 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp, Skull, Zap, Dices } from "luc
 import Link from "next/link";
 import { mockPortfolio, mockTrades } from "@/lib/mock-data";
 
+import Image from "next/image";
+
+// ... (existing imports)
+
 export default function Home() {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-        <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, Trader. Here is your daily briefing.</p>
+      <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+        <Image 
+            src="/banner.png" 
+            alt="SimuDEX Banner" 
+            fill 
+            className="object-cover"
+            priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent flex flex-col justify-end p-6">
+             <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-md">Dashboard</h1>
+             <p className="text-muted-foreground text-lg drop-shadow-md">Welcome back, Trader. Here is your daily briefing.</p>
         </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 justify-end items-center">
         <div className="flex gap-2">
             <Button asChild variant="outline">
                 <Link href="/market">View Market</Link>
