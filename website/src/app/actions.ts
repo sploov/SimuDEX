@@ -1,10 +1,8 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 export async function createToken(formData: FormData) {
   const session = await auth();
