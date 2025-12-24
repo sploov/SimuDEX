@@ -5,6 +5,8 @@ import { AppSidebar, MobileNav } from "@/components/layout/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserAuth } from "@/components/layout/UserAuth";
+import { PriceTicker } from "@/components/layout/PriceTicker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,47 +22,6 @@ export const metadata: Metadata = {
   title: "SimuDEX | The Realistic Crypto Simulator",
   description: "Experience decentralized trading without the financial risk. Trade, bet, and rugplay.",
 };
-
-import { UserAuth } from "@/components/layout/UserAuth";
-
-"use client";
-
-import { useEffect, useState } from "react";
-import { getTokens } from "@/app/actions";
-
-function PriceTicker() {
-  const [tokens, setTokens] = useState<any[]>([]);
-
-  useEffect(() => {
-    getTokens().then(setTokens);
-    const interval = setInterval(() => getTokens().then(setTokens), 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="hidden md:flex overflow-hidden whitespace-nowrap bg-primary/5 border-y border-white/5 py-1">
-      <div className="animate-marquee inline-block">
-        {tokens.map((t) => (
-          <span key={t.id} className="mx-6 text-xs font-mono">
-            <span className="text-muted-foreground">{t.symbol}:</span>{" "}
-            <span className={t.price > 1 ? "text-green-400" : "text-blue-400"}>
-              ${t.price.toFixed(t.price < 0.01 ? 6 : 2)}
-            </span>
-          </span>
-        ))}
-        {/* Duplicate for seamless loop */}
-        {tokens.map((t) => (
-          <span key={`dup-${t.id}`} className="mx-6 text-xs font-mono">
-            <span className="text-muted-foreground">{t.symbol}:</span>{" "}
-            <span className={t.price > 1 ? "text-green-400" : "text-blue-400"}>
-              ${t.price.toFixed(t.price < 0.01 ? 6 : 2)}
-            </span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function RootLayout({
   children,
