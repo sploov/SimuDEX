@@ -53,7 +53,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="hidden border-r bg-card/50 md:block md:w-64 lg:w-72 h-screen sticky top-0 backdrop-blur-xl">
+    <div className="hidden border-r border-white/10 bg-background/40 md:block md:w-64 lg:w-72 h-screen sticky top-0 backdrop-blur-2xl">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-16 items-center border-b px-6 lg:h-[70px]">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">

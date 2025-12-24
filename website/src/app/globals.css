@@ -133,4 +133,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  .dark body {
+    background: radial-gradient(circle at 50% -20%, oklch(0.2 0.1 270), oklch(0.12 0.03 264));
+    background-attachment: fixed;
+  }
 }
