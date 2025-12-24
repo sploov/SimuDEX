@@ -15,15 +15,17 @@ import {
   PlusCircle,
   Bell,
   Info,
-  Radio,
   FileText,
   Shield,
   Menu,
+  RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Image from "next/image";
 
 const navItems = [
   { name: "Home", href: "/", icon: LayoutDashboard },
@@ -41,13 +43,9 @@ const footerItems = [
   { name: "About", href: "/about", icon: Info },
   { name: "Terms", href: "/terms", icon: FileText },
   { name: "Privacy", href: "/privacy", icon: Shield },
-  { name: "Changelog", href: "/changelog", icon: RefreshCw }, // Added
-  { name: "Credits", href: "/credits", icon: Sparkles }, // Added
+  { name: "Changelog", href: "/changelog", icon: RefreshCw },
+  { name: "Credits", href: "/credits", icon: Sparkles },
 ];
-
-import Image from "next/image";
-
-// ... (existing imports)
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -122,7 +120,9 @@ export function MobileNav() {
             <SheetContent side="left" className="flex flex-col p-0 w-72">
                  <div className="flex h-14 items-center border-b px-6">
                     <Link href="/" className="flex items-center gap-2 font-bold text-xl" onClick={() => setOpen(false)}>
-                        <span className="text-primary text-2xl">⚡</span>
+                        <div className="relative w-6 h-6 mr-2">
+                            <Image src="/logo.png" alt="SimuDEX Logo" fill className="object-contain" />
+                        </div>
                         <span>SimuDEX</span>
                     </Link>
                 </div>
