@@ -5,23 +5,28 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Skull, Zap, Dices } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getUserPortfolio } from "@/app/actions";
+import { getUserPortfolio, getRecentTrades } from "@/app/actions";
 import Image from "next/image";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
+  const [recentTrades, setRecentTrades] = useState<any[]>([]);
 
   useEffect(() => {
     getUserPortfolio().then(setUser);
+    getRecentTrades().then(setRecentTrades);
+    
+    const interval = setInterval(() => {
+        getRecentTrades().then(setRecentTrades);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Generate some fake historical data based on current balance for the chart
-  // In a real V2, we would track this daily in the DB.
   const chartData = user ? Array.from({ length: 7 }).map((_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
-      // Random fluctuation around current balance
       const balance = user.balanceUSDT + (Math.random() * 1000 - 500); 
       return {
           name: date.toLocaleDateString('en-US', { weekday: 'short' }),
@@ -29,7 +34,6 @@ export default function Home() {
       };
   }) : [];
 
-  // Update last point to match actual current total
   if (user && chartData.length > 0) {
       const totalValue = user.balanceUSDT + user.positions.reduce((acc: any, p: any) => acc + (p.balance * p.token.price), 0);
       chartData[chartData.length - 1].value = totalValue;
@@ -64,7 +68,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Portfolio & Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-gradient-to-br from-primary/20 to-card border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -125,30 +128,30 @@ export default function Home() {
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4 border-white/5 bg-background/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Portfolio Performance</CardTitle>
             <CardDescription>Estimated value over time (Simulated)</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-             <div className="h-[200px] w-full">
+             <div className="h-[250px] w-full">
                 {user ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
                         <defs>
                             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4}/>
+                            <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
                             </linearGradient>
                         </defs>
                         <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
                         <Tooltip 
-                            contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
+                            contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)' }}
                             itemStyle={{ color: '#fff' }}
                         />
-                        <Area type="monotone" dataKey="value" stroke="#8884d8" fillOpacity={1} fill="url(#colorValue)" />
+                        <Area type="monotone" dataKey="value" stroke="#a855f7" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
                         </AreaChart>
                     </ResponsiveContainer>
                 ) : (
@@ -160,17 +163,48 @@ export default function Home() {
           </CardContent>
         </Card>
         
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Trades</CardTitle>
-            <CardDescription>Your latest activity</CardDescription>
+        <Card className="col-span-3 border-white/5 bg-background/50 backdrop-blur-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+                <CardTitle>Live Activity</CardTitle>
+                <CardDescription>Global trades across SimuDEX</CardDescription>
+            </div>
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-                {/* We would fetch real trades here, but for now we show a placeholder message if empty */}
-                 <div className="text-center py-8 text-muted-foreground text-sm">
-                    No recent trades found in this session.
-                 </div>
+                {recentTrades.length === 0 ? (
+                    <div className="text-center py-10 text-muted-foreground text-sm italic">
+                        Waiting for market activity...
+                    </div>
+                ) : (
+                    recentTrades.map((trade) => (
+                        <div key={trade.id} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0 animate-in fade-in slide-in-from-top-2 duration-500">
+                            <div className="flex items-center gap-3">
+                                <div className={`p-2 rounded-full ${trade.type === 'BUY' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                                    {trade.type === 'BUY' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                                </div>
+                                <div>
+                                    <div className="font-bold flex items-center gap-2 text-sm">
+                                        {trade.token.symbol}
+                                        <Badge variant="outline" className="text-[10px] h-4 px-1 uppercase">{trade.type}</Badge>
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground uppercase">
+                                        {new Date(trade.timestamp).toLocaleTimeString()}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="font-mono text-sm font-bold text-primary">
+                                    {trade.amountToken.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                </div>
+                                <div className="text-[10px] text-muted-foreground">
+                                    ${trade.amountUSDT.toLocaleString()} USDT
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
           </CardContent>
         </Card>

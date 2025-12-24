@@ -23,6 +23,45 @@ export const metadata: Metadata = {
 
 import { UserAuth } from "@/components/layout/UserAuth";
 
+"use client";
+
+import { useEffect, useState } from "react";
+import { getTokens } from "@/app/actions";
+
+function PriceTicker() {
+  const [tokens, setTokens] = useState<any[]>([]);
+
+  useEffect(() => {
+    getTokens().then(setTokens);
+    const interval = setInterval(() => getTokens().then(setTokens), 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="hidden md:flex overflow-hidden whitespace-nowrap bg-primary/5 border-y border-white/5 py-1">
+      <div className="animate-marquee inline-block">
+        {tokens.map((t) => (
+          <span key={t.id} className="mx-6 text-xs font-mono">
+            <span className="text-muted-foreground">{t.symbol}:</span>{" "}
+            <span className={t.price > 1 ? "text-green-400" : "text-blue-400"}>
+              ${t.price.toFixed(t.price < 0.01 ? 6 : 2)}
+            </span>
+          </span>
+        ))}
+        {/* Duplicate for seamless loop */}
+        {tokens.map((t) => (
+          <span key={`dup-${t.id}`} className="mx-6 text-xs font-mono">
+            <span className="text-muted-foreground">{t.symbol}:</span>{" "}
+            <span className={t.price > 1 ? "text-green-400" : "text-blue-400"}>
+              ${t.price.toFixed(t.price < 0.01 ? 6 : 2)}
+            </span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,20 +74,19 @@ export default function RootLayout({
       >
         <AppSidebar />
         <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-            <header className="h-14 lg:h-[60px] flex items-center gap-4 border-b bg-card/50 backdrop-blur-xl px-6 justify-between md:justify-end shrink-0 z-10">
-                <MobileNav />
-                
-                {/* Header Actions */}
-                <div className="flex items-center gap-2">
-                    <div className="hidden md:flex items-center gap-2 mr-4 bg-muted/50 px-3 py-1 rounded-full border border-border/50">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span className="text-xs font-mono text-muted-foreground">ETH: $1,200.45</span>
+            <header className="flex flex-col border-b bg-card/50 backdrop-blur-xl z-10">
+                <div className="h-14 lg:h-[60px] flex items-center gap-4 px-6 justify-between md:justify-end">
+                    <MobileNav />
+                    
+                    {/* Header Actions */}
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" className="rounded-full">
+                            <Bell className="w-4 h-4" />
+                        </Button>
+                        <UserAuth />
                     </div>
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                        <Bell className="w-4 h-4" />
-                    </Button>
-                    <UserAuth />
                 </div>
+                <PriceTicker />
             </header>
             
             <main className="flex-1 overflow-auto p-4 lg:p-6 relative">

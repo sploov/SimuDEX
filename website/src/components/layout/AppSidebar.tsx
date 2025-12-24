@@ -37,6 +37,7 @@ const navItems = [
   { name: "Portfolio", href: "/portfolio", icon: Wallet },
   { name: "Treemap", href: "/market#treemap", icon: Grid3X3 },
   { name: "Create Coin", href: "/create-coin", icon: PlusCircle },
+  { name: "Docs", href: "/docs", icon: Book },
 ];
 
 const footerItems = [
