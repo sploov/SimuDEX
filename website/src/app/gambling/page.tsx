@@ -7,24 +7,35 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dices, Coins, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { playCoinFlip } from "@/app/actions";
 
 export default function GamblingPage() {
   const [betAmount, setBetAmount] = useState("");
   const [flipping, setFlipping] = useState(false);
 
-  const handleFlip = () => {
-    if (!betAmount) return;
+  const handleFlip = async () => {
+    if (!betAmount || parseFloat(betAmount) <= 0) {
+        toast.error("Invalid amount");
+        return;
+    }
+    
     setFlipping(true);
     
-    setTimeout(() => {
-        setFlipping(false);
-        const win = Math.random() > 0.5;
-        if (win) {
-            toast.success("YOU WON!", { description: `Received $${Number(betAmount) * 2} USDT` });
+    // Simulate delay for suspense
+    await new Promise(r => setTimeout(r, 1000));
+    
+    const result = await playCoinFlip(parseFloat(betAmount));
+    setFlipping(false);
+
+    if (result.error) {
+        toast.error("Error", { description: result.error });
+    } else {
+        if (result.win) {
+             toast.success("YOU WON!", { description: `Received $${(parseFloat(betAmount) * 2).toFixed(2)} USDT` });
         } else {
-            toast.error("YOU LOST", { description: `Better luck next time.` });
+             toast.error("YOU LOST", { description: `Better luck next time.` });
         }
-    }, 2000);
+    }
   };
 
   return (

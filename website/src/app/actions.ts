@@ -199,3 +199,63 @@ export async function executeTrade(tokenId: string, amountIn: number, type: "BUY
         return { error: "Trade transaction failed" };
     }
 }
+
+export async function playCoinFlip(amount: number) {
+    const session = await auth();
+    if (!session?.user?.email) return { error: "Not logged in" };
+
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) return { error: "User not found" };
+
+    if (user.balanceUSDT < amount) return { error: "Insufficient USDT balance" };
+
+    const win = Math.random() > 0.5;
+    const payout = win ? amount * 2 : 0;
+    const netChange = win ? amount : -amount; // If win, add amount (profit). If lose, subtract amount.
+
+    try {
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: user.id },
+                data: { balanceUSDT: { increment: netChange } }
+            }),
+            prisma.bet.create({
+                data: {
+                    userId: user.id,
+                    gameType: "COIN_FLIP",
+                    amount: amount,
+                    won: win,
+                    payout: payout
+                }
+            })
+        ]);
+        
+        revalidatePath("/portfolio");
+        revalidatePath("/gambling");
+        
+        return { success: true, win, newBalance: user.balanceUSDT + netChange };
+    } catch (e) {
+        console.error("Gambling failed", e);
+        return { error: "Transaction failed" };
+    }
+}
+
+export async function getLeaderboard() {
+    try {
+        // Fetch top 50 users by USDT balance (simplified for now, ideally should calculate total net worth including tokens)
+        const users = await prisma.user.findMany({
+            take: 50,
+            orderBy: { balanceUSDT: 'desc' },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                balanceUSDT: true,
+                createdAt: true
+            }
+        });
+        return users;
+    } catch (e) {
+        return [];
+    }
+}

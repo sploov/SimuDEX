@@ -9,8 +9,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Trophy, Medal } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getLeaderboard } from "@/app/actions";
 
 export default function LeaderboardPage() {
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    getLeaderboard().then(setUsers);
+  }, []);
+
   return (
     <div className="space-y-6">
        <div>
@@ -24,22 +32,22 @@ export default function LeaderboardPage() {
               <TableRow>
                 <TableHead className="w-[100px]">Rank</TableHead>
                 <TableHead>User</TableHead>
-                <TableHead>Total Value</TableHead>
-                <TableHead className="text-right">Win Rate</TableHead>
+                <TableHead>Liquid USDT</TableHead>
+                <TableHead className="text-right">Joined</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rank) => (
-                <TableRow key={rank}>
+              {users.map((user, index) => (
+                <TableRow key={user.id}>
                   <TableCell className="font-medium flex items-center gap-2">
-                    {rank === 1 && <Medal className="w-4 h-4 text-yellow-500" />}
-                    {rank === 2 && <Medal className="w-4 h-4 text-gray-400" />}
-                    {rank === 3 && <Medal className="w-4 h-4 text-amber-600" />}
-                    #{rank}
+                    {index === 0 && <Medal className="w-4 h-4 text-yellow-500" />}
+                    {index === 1 && <Medal className="w-4 h-4 text-gray-400" />}
+                    {index === 2 && <Medal className="w-4 h-4 text-amber-600" />}
+                    #{index + 1}
                   </TableCell>
-                  <TableCell>Trader_{Math.floor(Math.random() * 10000)}</TableCell>
-                  <TableCell>${(1000000 / rank).toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{(Math.random() * 100).toFixed(1)}%</TableCell>
+                  <TableCell>{user.username || user.email?.split('@')[0] || "Anonymous"}</TableCell>
+                  <TableCell>${user.balanceUSDT.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell>
+                  <TableCell className="text-right">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

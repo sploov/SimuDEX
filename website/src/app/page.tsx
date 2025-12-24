@@ -4,13 +4,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Skull, Zap, Dices } from "lucide-react";
 import Link from "next/link";
-import { mockPortfolio, mockTrades } from "@/lib/mock-data";
-
+import { useEffect, useState } from "react";
+import { getUserPortfolio } from "@/app/actions";
 import Image from "next/image";
-
-// ... (existing imports)
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    getUserPortfolio().then(setUser);
+  }, []);
+
+  // Generate some fake historical data based on current balance for the chart
+  // In a real V2, we would track this daily in the DB.
+  const chartData = user ? Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      // Random fluctuation around current balance
+      const balance = user.balanceUSDT + (Math.random() * 1000 - 500); 
+      return {
+          name: date.toLocaleDateString('en-US', { weekday: 'short' }),
+          value: balance > 0 ? balance : 0
+      };
+  }) : [];
+
+  // Update last point to match actual current total
+  if (user && chartData.length > 0) {
+      const totalValue = user.balanceUSDT + user.positions.reduce((acc: any, p: any) => acc + (p.balance * p.token.price), 0);
+      chartData[chartData.length - 1].value = totalValue;
+  }
+
+  const totalValue = user ? user.balanceUSDT + user.positions.reduce((acc: any, p: any) => acc + (p.balance * p.token.price), 0) : 0;
+
   return (
     <div className="space-y-6">
       <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
@@ -46,9 +72,9 @@ export default function Home() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${mockPortfolio.balance.toLocaleString()}</div>
+            <div className="text-2xl font-bold">${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
             <p className="text-xs text-green-500 flex items-center mt-1">
-              +{mockPortfolio.change}% <span className="text-muted-foreground ml-1">from last month</span>
+              +12.5% <span className="text-muted-foreground ml-1">simulated APY</span>
             </p>
           </CardContent>
         </Card>
@@ -60,7 +86,7 @@ export default function Home() {
                 <Skull className="h-4 w-4 text-muted-foreground group-hover:text-red-500 transition-colors" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">3 Live</div>
+                <div className="text-2xl font-bold">Live</div>
                 <p className="text-xs text-muted-foreground mt-1">
                 Risk it all? <span className="text-red-400 font-bold">Play now &rarr;</span>
                 </p>
@@ -86,13 +112,13 @@ export default function Home() {
         <Link href="/gambling">
              <Card className="hover:border-purple-500/50 transition-colors cursor-pointer group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium group-hover:text-purple-400 transition-colors">Recent Win</CardTitle>
+                <CardTitle className="text-sm font-medium group-hover:text-purple-400 transition-colors">Casino</CardTitle>
                 <Dices className="h-4 w-4 text-muted-foreground group-hover:text-purple-500 transition-colors" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">+$500</div>
+                <div className="text-2xl font-bold">Coin Flip</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                Won on "Coin Flip"
+                Double or Nothing.
                 </p>
             </CardContent>
             </Card>
@@ -106,36 +132,45 @@ export default function Home() {
             <CardDescription>Estimated value over time (Simulated)</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-             <div className="h-[200px] flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-md bg-muted/20">
-                Chart Placeholder (Recharts)
+             <div className="h-[200px] w-full">
+                {user ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                        <defs>
+                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                        <Tooltip 
+                            contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
+                            itemStyle={{ color: '#fff' }}
+                        />
+                        <Area type="monotone" dataKey="value" stroke="#8884d8" fillOpacity={1} fill="url(#colorValue)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
+                        Loading chart...
+                    </div>
+                )}
              </div>
           </CardContent>
         </Card>
         
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Live Trades</CardTitle>
-            <CardDescription>Real-time simulated activity</CardDescription>
+            <CardTitle>Recent Trades</CardTitle>
+            <CardDescription>Your latest activity</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-                {mockTrades.map((trade, i) => (
-                    <div key={i} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${trade.type === 'BUY' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
-                                {trade.type === 'BUY' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
-                            </div>
-                            <div>
-                                <div className="font-semibold">{trade.symbol}</div>
-                                <div className="text-xs text-muted-foreground">{trade.time}</div>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                             <div className="font-mono">{trade.amount}</div>
-                             <div className="text-xs text-muted-foreground">@ ${trade.price}</div>
-                        </div>
-                    </div>
-                ))}
+                {/* We would fetch real trades here, but for now we show a placeholder message if empty */}
+                 <div className="text-center py-8 text-muted-foreground text-sm">
+                    No recent trades found in this session.
+                 </div>
             </div>
           </CardContent>
         </Card>

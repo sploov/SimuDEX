@@ -1,10 +1,11 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart } from "lucide-react";
+import { PieChart as PieChartIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getUserPortfolio } from "@/app/actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export default function PortfolioPage() {
   const [user, setUser] = useState<any>(null);
@@ -38,6 +39,17 @@ export default function PortfolioPage() {
       return acc + (pos.balance * pos.token.price);
   }, 0);
 
+  // Prepare Pie Chart Data
+  const pieData = [
+      { name: 'USDT', value: user.balanceUSDT },
+      ...user.positions.map((pos: any) => ({
+          name: pos.token.symbol,
+          value: pos.balance * pos.token.price
+      }))
+  ].filter(item => item.value > 0);
+
+  const COLORS = ['#10b981', '#8884d8', '#ffc658', '#ff8042', '#0088fe'];
+
   return (
     <div className="space-y-6">
        <div>
@@ -50,9 +62,29 @@ export default function PortfolioPage() {
                 <CardHeader>
                     <CardTitle>Asset Allocation</CardTitle>
                 </CardHeader>
-                <CardContent className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg bg-muted/10">
-                    <PieChart className="w-10 h-10 text-muted-foreground" />
-                    <span className="ml-2 text-muted-foreground">Allocation Chart (Coming Soon)</span>
+                <CardContent className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={100}
+                                fill="#8884d8"
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {pieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip 
+                                formatter={(value: number) => `$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                                contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
                 </CardContent>
             </Card>
             <Card>
