@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getTokens } from "@/app/actions";
-import Link from "next/link";
+import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 
 export default function MarketPage() {
   const [tokens, setTokens] = useState<any[]>([]);
@@ -22,6 +22,49 @@ export default function MarketPage() {
   useEffect(() => {
     getTokens().then(setTokens);
   }, []);
+
+  const treemapData = [
+      {
+          name: 'Tokens',
+          children: tokens.map(t => ({
+              name: t.symbol,
+              size: t.marketCap > 0 ? t.marketCap : 1000,
+              price: t.price
+          }))
+      }
+  ];
+
+  const CustomizedContent = (props: any) => {
+    const { x, y, width, height, index, name } = props;
+    return (
+      <g>
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          style={{
+            fill: index % 2 === 0 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+            stroke: '#fff',
+            strokeWidth: 1,
+            strokeOpacity: 0.1,
+          }}
+        />
+        {width > 30 && height > 30 && (
+          <text
+            x={x + width / 2}
+            y={y + height / 2}
+            textAnchor="middle"
+            fill="#fff"
+            fontSize={12}
+            fontWeight="bold"
+          >
+            {name}
+          </text>
+        )}
+      </g>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -36,6 +79,7 @@ export default function MarketPage() {
             <CardDescription>Ranked by volume and community interest.</CardDescription>
         </CardHeader>
         <CardContent>
+            {/* ... Table stays same ... */}
             <Table>
                 <TableHeader>
                 <TableRow>
@@ -93,16 +137,26 @@ export default function MarketPage() {
            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Info className="w-5 h-5" /> Market Map (Treemap)
            </h2>
-           <div className="grid grid-cols-4 grid-rows-2 h-64 gap-1">
-                {/* Simplified Treemap Placeholder */}
-                <div className="col-span-2 row-span-2 bg-green-500/20 border border-green-500/50 rounded p-4 flex flex-col justify-between hover:bg-green-500/30 transition-colors cursor-pointer">
-                    <span className="font-bold">BTC (Sim)</span>
-                    <span className="text-green-500">+2.5%</span>
-                </div>
-                 <div className="bg-red-500/20 border border-red-500/50 rounded p-4 flex flex-col justify-between hover:bg-red-500/30 transition-colors cursor-pointer">
-                    <span className="font-bold">ETH (Sim)</span>
-                    <span className="text-red-500">-1.2%</span>
-                </div>
+           <div className="h-96 w-full bg-card/50 rounded-xl border border-white/10 overflow-hidden p-4">
+                {tokens.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <Treemap
+                            data={treemapData}
+                            dataKey="size"
+                            aspectRatio={4 / 3}
+                            stroke="#fff"
+                            content={<CustomizedContent />}
+                        >
+                             <RechartsTooltip 
+                                contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }}
+                             />
+                        </Treemap>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground italic">
+                        No market data available yet.
+                    </div>
+                )}
            </div>
       </div>
     </div>

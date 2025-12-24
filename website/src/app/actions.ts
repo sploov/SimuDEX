@@ -240,22 +240,81 @@ export async function playCoinFlip(amount: number) {
     }
 }
 
-export async function getLeaderboard() {
+export async function playRugplay(betAmount: number, multiplier: number, won: boolean) {
+    const session = await auth();
+    if (!session?.user?.email) return { error: "Not logged in" };
+
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) return { error: "User not found" };
+
+    if (!won && user.balanceUSDT < betAmount) return { error: "Insufficient balance" };
+
+    const netChange = won ? (betAmount * multiplier) - betAmount : -betAmount;
+
     try {
-        // Fetch top 50 users by USDT balance (simplified for now, ideally should calculate total net worth including tokens)
-        const users = await prisma.user.findMany({
-            take: 50,
-            orderBy: { balanceUSDT: 'desc' },
-            select: {
-                id: true,
-                username: true,
-                email: true,
-                balanceUSDT: true,
-                createdAt: true
-            }
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: user.id },
+                data: { balanceUSDT: { increment: netChange } }
+            }),
+            prisma.bet.create({
+                data: {
+                    userId: user.id,
+                    gameType: "RUGPLAY",
+                    amount: betAmount,
+                    won: won,
+                    payout: won ? betAmount * multiplier : 0
+                }
+            })
+        ]);
+        revalidatePath("/portfolio");
+        return { success: true, newBalance: user.balanceUSDT + netChange };
+    } catch (e) {
+        return { error: "Transaction failed" };
+    }
+}
+
+export async function getRecentTrades() {
+    try {
+        return await prisma.trade.findMany({
+            take: 10,
+            orderBy: { timestamp: "desc" },
+            include: { token: true }
         });
-        return users;
     } catch (e) {
         return [];
     }
 }
+
+export async function getNews() {
+    try {
+        return await prisma.news.findMany({
+            take: 10,
+            orderBy: { createdAt: "desc" }
+        });
+    } catch (e) {
+        return [];
+    }
+}
+
+export async function seedNews() {
+    const headlines = [
+        { headline: "Bitcoin CEO announces partnership with Mars Colony", impact: "BULLISH" },
+        { headline: "Rumors: Pepe token actually a frog, market confused", impact: "NEUTRAL" },
+        { headline: "Federal Reserve prints more money, crypto cheers", impact: "BULLISH" },
+        { headline: "Major exchange accidentally deletes database", impact: "BEARISH" },
+        { headline: "SimuDEX volume hits all-time high!", impact: "BULLISH" },
+    ];
+    
+    try {
+        await prisma.news.createMany({
+            data: headlines
+        });
+        revalidatePath("/hopium");
+        return { success: true };
+    } catch (e) {
+        return { error: "Failed to seed news" };
+    }
+}
+
+

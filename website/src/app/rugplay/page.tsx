@@ -7,11 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Timer, Skull, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { playRugplay } from "@/app/actions";
 
 export default function RugplayPage() {
   const [multiplier, setMultiplier] = useState(1.0);
   const [crashed, setCrashed] = useState(false);
   const [running, setRunning] = useState(false);
+  const [betAmount] = useState(100);
   
   // Game Logic (Simulation)
   useEffect(() => {
@@ -24,6 +26,8 @@ export default function RugplayPage() {
             if (crashChance < 0.02 + (prev * 0.005)) {
                 setCrashed(true);
                 setRunning(false);
+                // Report loss to DB
+                playRugplay(betAmount, prev, false);
                 toast.error("RUGGED! The liquidity was pulled.", { description: `Crashed at ${prev.toFixed(2)}x` });
                 return prev;
             }
@@ -32,7 +36,7 @@ export default function RugplayPage() {
       }, 100);
     }
     return () => clearInterval(interval);
-  }, [running, crashed]);
+  }, [running, crashed, betAmount]);
 
   const handleStart = () => {
     setMultiplier(1.0);
@@ -41,9 +45,16 @@ export default function RugplayPage() {
     toast("Liquidity Locked", { description: "The pump has started! Good luck." });
   };
 
-  const handleCashout = () => {
+  const handleCashout = async () => {
+    const finalMult = multiplier;
     setRunning(false);
-    toast.success("Sold Top!", { description: `You secured a ${multiplier.toFixed(2)}x profit!` });
+    const result = await playRugplay(betAmount, finalMult, true);
+    
+    if (result.error) {
+        toast.error("Cashout Error", { description: result.error });
+    } else {
+        toast.success("Sold Top!", { description: `You secured a ${finalMult.toFixed(2)}x profit!` });
+    }
   };
 
   return (
