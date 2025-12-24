@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getTokens } from "@/app/actions";
+import Link from "next/link";
 
 export default function MarketPage() {
   const [tokens, setTokens] = useState<any[]>([]);
@@ -75,10 +76,6 @@ export default function MarketPage() {
                                 <Badge variant="secondary">Verified</Badge>
                             )}
                         </TableCell>
-import Link from "next/link";
-// ... (imports)
-
-// ... inside map loop
                         <TableCell className="text-right">
                             <Button size="sm" variant="outline" asChild>
                                 <Link href={`/trade/${token.id}`}>Trade</Link>
