@@ -1,0 +1,68 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { AppSidebar, MobileNav } from "@/components/layout/AppSidebar";
+import { Toaster } from "@/components/ui/sonner";
+import { Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "SimuDEX | The Realistic Crypto Simulator",
+  description: "Experience decentralized trading without the financial risk. Trade, bet, and rugplay.",
+};
+
+import { UserAuth } from "@/components/layout/UserAuth";
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="dark">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground flex h-screen overflow-hidden`}
+      >
+        <AppSidebar />
+        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+            <header className="h-14 lg:h-[60px] flex items-center gap-4 border-b bg-card/50 backdrop-blur-xl px-6 justify-between md:justify-end shrink-0 z-10">
+                <MobileNav />
+                
+                {/* Header Actions */}
+                <div className="flex items-center gap-2">
+                    <div className="hidden md:flex items-center gap-2 mr-4 bg-muted/50 px-3 py-1 rounded-full border border-border/50">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span className="text-xs font-mono text-muted-foreground">ETH: $1,200.45</span>
+                    </div>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                        <Bell className="w-4 h-4" />
+                    </Button>
+                    <UserAuth />
+                </div>
+            </header>
+            
+            <main className="flex-1 overflow-auto p-4 lg:p-6 relative">
+                 {/* Background Glow Effects */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+                     <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[128px]" />
+                     <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[128px]" />
+                </div>
+                
+                {children}
+            </main>
+        </div>
+        <Toaster />
+      </body>
+    </html>
+  );
+}

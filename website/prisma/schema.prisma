@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  username      String?         @unique
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  
+  walletAddress String?         @unique // Simulated wallet address (optional now, can be generated)
+  balanceUSDT   Float           @default(10000.0) // Everyone starts with 10k fake USDT
+  createdAt     DateTime        @default(now())
+  
+  trades        Trade[]
+  positions     Position[]
+  bets          Bet[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+}
+ 
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+}
+
+model Token {
+  id          String   @id @default(uuid())
+  name        String
+  symbol      String   @unique
+  description String?
+  imageUrl    String?  // URL to icon
+  creatorId   String?
+  
+  // Market Data
+  price       Float    @default(1.0)
+  marketCap   Float    @default(0.0)
+  supply      Float    @default(1000000.0)
+  reserveUSDT Float    @default(10000.0) // For simulated AMM
+  reserveToken Float   @default(10000.0) // For simulated AMM
+  
+  isRugPull   Boolean  @default(false) // For Rugplay mode
+  rugTime     DateTime? 
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trades      Trade[]
+  positions   Position[]
+  priceHistory PriceHistory[]
+}
+
+model PriceHistory {
+  id        String   @id @default(uuid())
+  tokenId   String
+  token     Token    @relation(fields: [tokenId], references: [id])
+  price     Float
+  timestamp DateTime @default(now())
+}
+
+model Trade {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenId   String
+  token     Token    @relation(fields: [tokenId], references: [id])
+  
+  type      String   // "BUY" or "SELL"
+  amountToken Float
+  amountUSDT  Float
+  price       Float
+  
+  timestamp DateTime @default(now())
+}
+
+model Position {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenId   String
+  token     Token    @relation(fields: [tokenId], references: [id])
+  
+  balance   Float    @default(0.0)
+  
+  @@unique([userId, tokenId])
+}
+
+model Bet {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  gameType  String   // "COIN_FLIP", "PREDICTION"
+  amount    Float
+  won       Boolean
+  payout    Float    @default(0.0)
+  
+  createdAt DateTime @default(now())
+}
+
+model News {
+  id        String   @id @default(uuid())
+  headline  String
+  content   String?
+  impact    String   // "BULLISH", "BEARISH", "NEUTRAL"
+  createdAt DateTime @default(now())
+}
