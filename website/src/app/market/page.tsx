@@ -11,22 +11,30 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, Info } from "lucide-react";
+import { TrendingUp, TrendingDown, Info, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getTokens } from "@/app/actions";
 import { Treemap, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export default function MarketPage() {
   const [tokens, setTokens] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getTokens().then(setTokens);
   }, []);
 
+  const filteredTokens = tokens.filter(t => 
+    t.name.toLowerCase().includes(search.toLowerCase()) || 
+    t.symbol.toLowerCase().includes(search.toLowerCase())
+  );
+
   const treemapData = [
       {
           name: 'Tokens',
-          children: tokens.map(t => ({
+          children: filteredTokens.map(t => ({
               name: t.symbol,
               size: t.marketCap > 0 ? t.marketCap : 1000,
               price: t.price
@@ -68,9 +76,20 @@ export default function MarketPage() {
 
   return (
     <div className="space-y-6">
-       <div>
-            <h1 className="text-3xl font-bold tracking-tight">Market Overview</h1>
-            <p className="text-muted-foreground">Discover new tokens, track prices, and find the next moonshot.</p>
+       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">Market Overview</h1>
+                <p className="text-muted-foreground">Discover new tokens, track prices, and find the next moonshot.</p>
+            </div>
+            <div className="relative w-full md:w-72">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input 
+                    placeholder="Search tokens..." 
+                    className="pl-10 bg-card/50" 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+            </div>
         </div>
 
       <Card>
@@ -79,7 +98,6 @@ export default function MarketPage() {
             <CardDescription>Ranked by volume and community interest.</CardDescription>
         </CardHeader>
         <CardContent>
-            {/* ... Table stays same ... */}
             <Table>
                 <TableHeader>
                 <TableRow>
@@ -91,14 +109,14 @@ export default function MarketPage() {
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {tokens.length === 0 ? (
+                {filteredTokens.length === 0 ? (
                     <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                            No tokens found. Be the first to launch one!
+                            {tokens.length === 0 ? "No tokens found. Be the first to launch one!" : "No tokens match your search."}
                         </TableCell>
                     </TableRow>
                 ) : (
-                    tokens.map((token) => (
+                    filteredTokens.map((token) => (
                         <TableRow key={token.id}>
                         <TableCell className="font-medium flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
@@ -132,7 +150,7 @@ export default function MarketPage() {
             </Table>
         </CardContent>
       </Card>
-      
+
       <div id="treemap" className="pt-8">
            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <Info className="w-5 h-5" /> Market Map (Treemap)
