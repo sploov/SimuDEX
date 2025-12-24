@@ -41,6 +41,8 @@ const footerItems = [
   { name: "About", href: "/about", icon: Info },
   { name: "Terms", href: "/terms", icon: FileText },
   { name: "Privacy", href: "/privacy", icon: Shield },
+  { name: "Changelog", href: "/changelog", icon: RefreshCw }, // Added
+  { name: "Credits", href: "/credits", icon: Sparkles }, // Added
 ];
 
 import Image from "next/image";

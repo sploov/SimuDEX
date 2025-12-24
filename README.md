@@ -2,20 +2,27 @@
 
 ![SimuDEX Banner](website/public/banner.png)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)](https://www.typescriptlang.org/)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://vercel.com)
+[![Status](https://img.shields.io/badge/Status-Live-green)](https://simudex.vercel.app)
+
 > **A realistic cryptocurrency trading simulator that lets you experience the risks and mechanics of decentralized exchanges without real financial consequences.**
 
 SimuDEX is an open-source educational platform designed to gamify the DeFi experience. Create coins, trade with liquidity pools, bet on prediction questions, gamble it all, and climb the leaderboards!
 
+---
+
 ## 🚀 Features
 
-*   **🛡️ Risk-Free Trading:** Experience the thrill of the market with simulated assets.
+*   **🛡️ Risk-Free Trading:** Experience the thrill of the market with simulated assets (Start with **10,000 USDT**).
 *   **🦄 Real-Time Market:** Create your own tokens and watch them appear instantly on the global market.
+*   **💹 AMM Trading Engine:** Fully functional swap interface using `x * y = k` constant product formula.
 *   **🔐 GitHub Auth:** Secure and easy login to manage your portfolio and created assets.
-*   **💀 SimuDEX Mode (Formerly Rugplay):** A "Game of Chicken" where you try to ride a pump and sell before the inevitable liquidity pull.
+*   **💀 SimuDEX Mode:** A "Game of Chicken" where you try to ride a pump and sell before the inevitable liquidity pull.
 *   **📉 Hopium Feed:** A simulated social sentiment engine that drives simulated price action.
-*   **🎰 Gambling Zone:** "Double or Nothing" coin flips and prediction markets.
-*   **📊 Advanced Analytics:** Real-time charts, Treemaps (heatmaps), and portfolio tracking.
-*   **🏆 Leaderboards:** Compete globally for the highest portfolio value.
+*   **📊 Advanced Analytics:** Real-time charts, Treemaps, and detailed portfolio tracking.
 
 ## 🛠️ Tech Stack
 
@@ -25,17 +32,8 @@ SimuDEX is an open-source educational platform designed to gamify the DeFi exper
 *   **Database:** [PostgreSQL](https://www.postgresql.org/) (via [Supabase](https://supabase.com/))
 *   **ORM:** [Prisma](https://www.prisma.io/)
 *   **Auth:** [NextAuth.js](https://next-auth.js.org/) (GitHub Provider)
-*   **State:** Zustand
 
 ## 📦 Getting Started
-
-### Prerequisites
-
-*   Node.js 18+
-*   A [Supabase](https://supabase.com/) project (PostgreSQL)
-*   A [GitHub OAuth](https://github.com/settings/developers) App
-
-### Installation
 
 1.  **Clone the repository:**
     ```bash
@@ -49,17 +47,7 @@ SimuDEX is an open-source educational platform designed to gamify the DeFi exper
     ```
 
 3.  **Environment Setup:**
-    Create a `.env` file in the `website` directory:
-    ```env
-    # Database (Supabase)
-    DATABASE_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true"
-    DIRECT_URL="postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
-
-    # Auth (GitHub)
-    GITHUB_ID="your_github_client_id"
-    GITHUB_SECRET="your_github_client_secret"
-    AUTH_SECRET="generate_a_random_secret_here"
-    ```
+    Create a `.env` file in the `website` directory with your Supabase & GitHub credentials.
 
 4.  **Sync Database:**
     ```bash
@@ -70,35 +58,22 @@ SimuDEX is an open-source educational platform designed to gamify the DeFi exper
     ```bash
     npm run dev
     ```
-    Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-## 📂 Project Structure
+## 📜 Documentation
 
-```bash
-/
-├── website/              # The Next.js Application
-│   ├── public/           # Static assets (Logos, Banners)
-│   ├── prisma/           # Database Schema (PostgreSQL)
-│   ├── src/
-│   │   ├── app/          # Next.js App Router Pages
-│   │   │   ├── api/      # API Routes (Auth)
-│   │   │   └── actions.ts # Server Actions (Backend Logic)
-│   │   ├── components/   # React Components (Shadcn/UI)
-│   │   └── lib/          # Utilities
-├── LICENSE               # MIT License
-└── README.md             # Documentation
-```
+*   [Changelog](CHANGELOG.md) - See what's new.
+*   [Credits](website/src/app/credits/page.tsx) - The team behind SimuDEX.
 
 ## 🤝 Contributing
 
 This project is open-source under the MIT License. Contributions are welcome!
 
 1.  Fork the repository
-2.  Create your feature branch (`git checkout -b feature/amazing-feature`)
-3.  Commit your changes (`git commit -m 'Add some amazing feature'`)
-4.  Push to the branch (`git push origin feature/amazing-feature`)
+2.  Create your feature branch
+3.  Commit your changes
+4.  Push to the branch
 5.  Open a Pull Request
 
 ---
 
-**Hosted on Vercel | Made by Sploov**
+**Hosted on Vercel | Made by Sploov & Ramkrishna**
